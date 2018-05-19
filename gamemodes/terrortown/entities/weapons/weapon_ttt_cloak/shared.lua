@@ -1,7 +1,7 @@
 if SERVER then
    AddCSLuaFile("shared.lua")
    
-   resource.AddFile("materials/VGUI/ttt/lykrast/icon_cloakingdevice.png")
+   resource.AddFile("materials/vgui/ttt/lykrast/icon_cloakingdevice.png")
 end
 
 if CLIENT then
@@ -9,7 +9,7 @@ if CLIENT then
     SWEP.Slot = 7
     SWEP.DrawAmmo = false
     SWEP.DrawCrosshair = false
-    SWEP.Icon = "VGUI/ttt/lykrast/icon_cloakingdevice.png"
+    SWEP.Icon = "vgui/ttt/lykrast/icon_cloakingdevice.png"
  
     SWEP.EquipMenuData = {
        type = "item_weapon",
@@ -46,8 +46,9 @@ SWEP.Primary.ClipSize = -1
 SWEP.Primary.DefaultClip = -1
 SWEP.Primary.Automatic = false
 SWEP.Primary.Ammo = "none"
+
 SWEP.NoSights = true
-SWEP.AllowDrop = false
+SWEP.AllowDrop = true
 
 function SWEP:PrimaryAttack()
     return false
@@ -65,7 +66,10 @@ function SWEP:Cloak()
     self.cloakedPly = self.Owner
     
     if IsValid(self.cloakedPly) then
-        self.cloakedPly:SetColor(Color(255, 255, 255, 3)) 			
+        self.oldColor = self.cloakedPly:GetColor()
+        self.cloakedPly:SetColor(Color(255, 255, 255, 3))
+        
+        self.oldMat = self.cloakedPly:GetMaterial()
         self.cloakedPly:SetMaterial("sprites/heatwave")
         
         self:EmitSound("AlyxEMP.Charge")
@@ -76,7 +80,8 @@ end
 
 function SWEP:UnCloak()
     if IsValid(self.cloakedPly) then
-        self.cloakedPly:SetMaterial("models/glass")
+        self.cloakedPly:SetColor(self.oldColor)
+        self.cloakedPly:SetMaterial(self.oldMat)
         
         self:EmitSound("AlyxEMP.Discharge")
         
@@ -96,7 +101,7 @@ function SWEP:Holster()
     return true
 end
 
-function SWEP:OnDrop() --Hopefully this'll work
+function SWEP:OnDrop() -- Hopefully this'll work
     if self.conceal then
         self:UnCloak()
     end
@@ -104,7 +109,11 @@ function SWEP:OnDrop() --Hopefully this'll work
     self:Remove()
 end
 
-hook.Add("TTTPrepareRound", "UnCloakAll",function()
+function SWEP:ShouldDropOnDie()
+    return false
+end
+
+hook.Add("TTTPrepareRound", "UnCloakAll", function()
     for _, v in pairs(player.GetAll()) do
         v:SetMaterial("models/glass")
     end
