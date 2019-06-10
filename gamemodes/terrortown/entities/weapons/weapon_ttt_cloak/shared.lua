@@ -108,15 +108,15 @@ function SWEP:OnDrop() -- Hopefully this'll work
     
     self:Remove()
 end
-
+--[[
 function SWEP:OnRemove() -- hopefully this works for Player.StripWeapons
     if self.conceal then
         self:UnCloak()
     end
     
-    self:Remove()
+    -- self:Remove()
 end
-
+--]]
 function SWEP:ShouldDropOnDie()
     return false
 end
